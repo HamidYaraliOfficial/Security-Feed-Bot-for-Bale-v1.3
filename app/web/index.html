@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ربات رصد امنیتی بله</title>
+<script>
+(function(){try{var t=localStorage.getItem("balebot_theme");
+if(!t)t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"night":"blue";
+if(t!=="blue")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<style>
+@font-face{font-family:"Vazirmatn";src:url("/fonts/Vazirmatn-Regular.ttf") format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Vazirmatn";src:url("/fonts/Vazirmatn-Bold.ttf") format("truetype");font-weight:700;font-display:swap}
+:root{--bg:#f2f5fb;--card:#fff;--soft:#f6f8fd;--ink:#16202f;--mut:#65748b;--line:#e1e7f1;--pri:#3a6bff;--pri2:#7a4dff;
+--ok:#0f9d63;--okbg:#e6f7ef;--bad:#e03e45;--badbg:#fdecee;--warn:#c27c00;--warnbg:#fff4de;--info:#2c62e8;--infobg:#e9f0ff;
+--shadow:0 8px 28px rgba(28,52,110,.08);--r:14px}
+/* ---------- colour themes (chosen with the 🎨 button) ---------- */
+[data-theme="pink"]{--bg:#fdf1f6;--soft:#fff6fa;--line:#f3d9e5;--pri:#e8458b;--pri2:#ff7aa8;--infobg:#ffe6f0;--info:#c92a72}
+[data-theme="red"]{--bg:#fdf2f1;--soft:#fff6f5;--line:#f4dad8;--pri:#e5383b;--pri2:#ff6b57;--infobg:#ffe8e6;--info:#c0282b}
+[data-theme="purple"]{--bg:#f5f2fd;--soft:#faf8ff;--line:#e5ddf6;--pri:#7c3aed;--pri2:#c04bff;--infobg:#efe8ff;--info:#6a2fd0}
+[data-theme="amber"]{--bg:#fff9e8;--soft:#fffcf2;--line:#f3e6c0;--pri:#d99100;--pri2:#ffc933;--infobg:#fff1c6;--info:#9c6a00}
+[data-theme="green"]{--bg:#eff8f3;--soft:#f5fbf8;--line:#d8eee2;--pri:#0f9d63;--pri2:#12b8a6;--infobg:#e1f6ec;--info:#0b7d50}
+[data-theme="orange"]{--bg:#fff5ec;--soft:#fffaf4;--line:#f6e0cd;--pri:#f26a0f;--pri2:#ffb020;--infobg:#ffeddc;--info:#b8520a}
+[data-theme="teal"]{--bg:#eefafb;--soft:#f4fcfd;--line:#d5eef1;--pri:#0ea5b7;--pri2:#3b82f6;--infobg:#dcf4f8;--info:#0a7d8d}
+[data-theme="rose"]{--bg:#fdf1f4;--soft:#fff6f8;--line:#f3d8df;--pri:#d6336c;--pri2:#f06595;--infobg:#ffe3ec;--info:#b02558}
+[data-theme="night"]{--bg:#0d121a;--card:#151c28;--soft:#1a2331;--ink:#e8eef8;--mut:#93a2b8;--line:#243044;--pri:#4c82ff;--pri2:#8b5cff;
+--ok:#3cc58a;--okbg:#10291f;--bad:#ff7076;--badbg:#321519;--warn:#e6b54a;--warnbg:#2e2410;--info:#7aa2ff;--infobg:#16213a;--shadow:0 8px 28px rgba(0,0,0,.35)}
+[data-theme="nightpink"]{--bg:#150d13;--card:#21141d;--soft:#2a1a25;--ink:#fbeaf2;--mut:#c19ab0;--line:#3d2434;--pri:#ff5c9d;--pri2:#c04bff;
+--ok:#3cc58a;--okbg:#10291f;--bad:#ff7076;--badbg:#321519;--warn:#e6b54a;--warnbg:#2e2410;--info:#ff8fbb;--infobg:#33182a;--shadow:0 8px 28px rgba(0,0,0,.4)}
+[data-theme="nightred"]{--bg:#140c0c;--card:#201313;--soft:#2a1a1a;--ink:#fbecea;--mut:#c49c98;--line:#3d2422;--pri:#ff4d50;--pri2:#ff8a3d;
+--ok:#3cc58a;--okbg:#10291f;--bad:#ff7076;--badbg:#321519;--warn:#e6b54a;--warnbg:#2e2410;--info:#ff8c8e;--infobg:#33191a;--shadow:0 8px 28px rgba(0,0,0,.4)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;line-height:1.85;font-size:14.5px}
+.ltr{direction:ltr;unicode-bidi:isolate;font-family:Consolas,"SFMono-Regular",monospace;font-size:.92em}
+b{font-weight:700}
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:20;background:var(--card);background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(10px);
+border-bottom:1px solid var(--line)}
+.top-in{max-width:1040px;margin:auto;padding:10px 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.brand{display:flex;align-items:center;gap:11px;margin-left:auto}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--pri),var(--pri2));display:grid;place-items:center;font-size:22px;
+box-shadow:0 6px 16px rgba(58,107,255,.35);box-shadow:0 6px 16px color-mix(in srgb,var(--pri) 40%,transparent)}
+.brand h1{font-size:16.5px;margin:0;line-height:1.35}.brand small{color:var(--mut);font-size:12px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:4px 14px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:13px;font-weight:700}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--mut)}
+.pill.on{color:var(--ok);border-color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent);background:var(--okbg)}
+.pill.on .dot{background:var(--ok);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(15,157,99,.55)}70%{box-shadow:0 0 0 8px rgba(15,157,99,0)}100%{box-shadow:0 0 0 0 rgba(15,157,99,0)}}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;font-weight:700;font-size:13.5px;padding:8px 16px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--ink);
+cursor:pointer;transition:.15s}
+button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(28,52,110,.12)}
+button:disabled{opacity:.55;cursor:wait;transform:none;box-shadow:none}
+button.pri{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;border-color:transparent}
+button.ok{background:var(--ok);color:#fff;border-color:transparent}
+button.bad{color:var(--bad);border-color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+button.sm{padding:4px 11px;font-size:12.5px;border-radius:9px}
+/* ---------- theme picker ---------- */
+.tp{position:relative}
+.tp-pop{position:absolute;top:calc(100% + 10px);left:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,.25);
+display:none;grid-template-columns:repeat(6,1fr);gap:10px 6px;width:372px;z-index:40}
+.tp-pop.open{display:grid}
+.tp-pop h4{grid-column:1/-1;margin:0;font-size:13px;color:var(--mut)}
+.tp-dot{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-size:10.5px;white-space:nowrap;color:var(--mut);border:0;background:none;padding:2px;box-shadow:none}
+.tp-dot:hover{transform:none;box-shadow:none;color:var(--ink)}
+.tp-dot i{width:34px;height:34px;border-radius:50%;display:block;border:3px solid transparent;box-shadow:0 3px 10px rgba(0,0,0,.25);transition:.15s}
+.tp-dot.act i{border-color:var(--ink);transform:scale(1.1)}
+/* ---------- stats ---------- */
+.wrap{max-width:1040px;margin:auto;padding:0 18px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:18px 0 6px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px 14px;box-shadow:var(--shadow)}
+.stat span{display:block;color:var(--mut);font-size:12px}.stat b{font-size:15px}
+.banner{margin:14px 0 0;padding:12px 16px;border-radius:var(--r);background:var(--warnbg);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);display:none}
+.banner a{color:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
+#errBar{margin:12px 0 0;padding:9px 14px;border-radius:12px;background:var(--badbg);color:var(--bad);display:none;font-size:13.5px}
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:18px 0 14px;padding:5px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.tabs button{border:0;background:transparent;white-space:nowrap;box-shadow:none;color:var(--mut);padding:8px 15px}
+.tabs button:hover{transform:none;color:var(--ink)}
+.tabs button.act{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff}
+.panel{display:none;animation:fade .25s}.panel.act{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* ---------- cards & fields ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card>h2{font-size:16px;margin:0 0 2px;display:flex;gap:9px;align-items:center}
+.card>.sub{color:var(--mut);font-size:13px;margin:0 0 14px}
+.field{margin-top:14px}
+.field>label,.lbl{display:block;font-weight:700;margin-bottom:2px}
+.req{font-size:11px;background:var(--badbg);color:var(--bad);border-radius:6px;padding:1px 7px;margin-right:6px;font-weight:700}
+.opt{font-size:11px;background:var(--soft);color:var(--mut);border-radius:6px;padding:1px 7px;margin-right:6px;font-weight:400}
+.hint{color:var(--mut);font-size:12.8px;margin:0 0 6px}.hint b{color:var(--ink)}
+input[type=text],input[type=password],input[type=number],textarea,select{width:100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:11px;
+background:var(--soft);color:var(--ink);font:inherit;transition:.15s}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--pri);box-shadow:0 0 0 4px color-mix(in srgb,var(--pri) 18%,transparent);background:var(--card)}
+textarea{min-height:84px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:12px}.row>*{flex:1 1 200px}.row>.fix{flex:0 0 auto}
+.inline{display:flex;gap:8px}.inline input{flex:1}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+/* ---------- switch ---------- */
+.sw{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--soft);margin-top:10px;cursor:pointer}
+.sw input{display:none}
+.slider{flex:0 0 40px;height:22px;border-radius:99px;background:#b6c0d2;position:relative;margin-top:3px;transition:.2s}
+.slider::after{content:"";position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.sw input:checked+.slider{background:var(--ok)}.sw input:checked+.slider::after{right:21px}
+.swt b{display:block}.swt small{color:var(--mut);font-size:12.5px;display:block;line-height:1.7}
+/* ---------- alerts ---------- */
+.alert{margin-top:12px;padding:9px 13px;border-radius:11px;font-size:13.5px;border:1px solid transparent}
+.alert.ok{background:var(--okbg);color:var(--ok)}.alert.err{background:var(--badbg);color:var(--bad)}
+.alert.warn{background:var(--warnbg);color:var(--warn)}.alert.info{background:var(--infobg);color:var(--info)}
+.alert div{padding:1px 0}
+.alert .sm-t{font-size:12.5px;opacity:.9}
+/* ---------- sources ---------- */
+.catbox{margin-top:16px}
+.cathead{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-weight:700}
+.cathead a{font-weight:400;font-size:12.5px;color:var(--pri);cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:8px}
+.cc{display:flex;gap:10px;align-items:center;padding:8px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);cursor:pointer;transition:.15s;position:relative}
+.cc:hover{border-color:color-mix(in srgb,var(--pri) 50%,var(--line))}
+.cc input{accent-color:var(--pri);width:17px;height:17px;flex:0 0 auto}
+.cc:has(input:checked){border-color:var(--pri);background:var(--infobg)}
+.cc .nm{display:block;font-weight:700;font-size:13.5px;line-height:1.5}
+.cc small{display:block;direction:ltr;text-align:left;color:var(--mut);font-size:10.5px;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.res{margin-right:auto;font-size:11.5px;font-weight:700;white-space:nowrap}.res.ok{color:var(--ok)}.res.err{color:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:inline-flex;gap:8px;align-items:center;background:var(--infobg);color:var(--info);border-radius:99px;padding:3px 6px 3px 14px;font-weight:700;font-size:13px}
+.chip a{background:var(--card);color:var(--bad);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;cursor:pointer;font-size:11px}
+.myfeed{display:flex;gap:10px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:var(--soft);flex-wrap:wrap}
+.myfeed .nm{font-weight:700}.myfeed small{direction:ltr;color:var(--mut);font-size:11px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.myfeed select{width:auto;padding:3px 8px;font-size:12.5px}
+.myfeed .del{color:var(--bad);cursor:pointer;font-size:12.5px}
+/* ---------- provider cards ---------- */
+.provs{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin-top:8px}
+.prov{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--soft);cursor:pointer;transition:.15s}
+.prov input{display:none}.prov b{display:block}.prov small{color:var(--mut);font-size:12px;display:block;line-height:1.65}
+.prov:has(input:checked){border-color:var(--pri);background:var(--infobg);box-shadow:0 0 0 3px color-mix(in srgb,var(--pri) 15%,transparent)}
+.subbox{margin-top:12px;padding:4px 14px 14px;border:1px dashed var(--line);border-radius:12px}
+/* ---------- logs ---------- */
+#logs{background:#0b1018;color:#cbd5e5;border-radius:12px;padding:12px 14px;height:430px;overflow:auto;font-size:12.8px;line-height:1.85;border:1px solid #1d2838}
+#logs .l-warn{color:#f0c35a}#logs .l-error{color:#ff8187}#logs time{color:#6f819c;margin-left:8px;direction:ltr;display:inline-block}
+details{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:6px 14px;background:var(--soft)}
+summary{cursor:pointer;font-weight:700;padding:4px 0}
+ol.steps{margin:6px 0;padding-right:22px}ol.steps li{margin:3px 0}
+.toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:50;align-items:center}
+.toast{background:#18202e;color:#fff;padding:9px 18px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:13.5px;animation:fade .2s}
+.toast.ok{background:#0f8a58}.toast.err{background:#c8353b}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:6px 0 40px}
+@media (max-width:640px){.acts button{padding:7px 11px}.brand small{display:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand"><div class="logo">🛡️</div><div><h1>ربات رصد امنیتی بله</h1><small>اخبار و گزارش‌های امنیت و شبکه، کامل و ترجمه‌شده در کانال شما</small></div></div>
+  <span id="badge" class="pill"><span class="dot"></span><span id="badgeT">متوقف</span></span>
+  <div class="tp"><button id="bTheme" title="تغییر رنگ داشبورد">🎨 تم</button>
+    <div class="tp-pop" id="tpPop"><h4>رنگ داشبورد را انتخاب کنید</h4></div></div>
+  <div class="acts">
+    <button class="pri" id="bSave">💾 ذخیره</button>
+    <button class="ok" id="bStart">▶ شروع</button>
+    <button class="bad" id="bStop">■ توقف</button>
+    <button id="bNow">⟳ اجرای فوری</button>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <div class="banner" id="banner">👋 برای شروع، توکن ربات و آیدی کانال را در تب <a data-go="connect">«اتصال به بله»</a> وارد کنید؛ بقیهٔ تنظیمات مقدار پیش‌فرض مناسب دارند.</div>
+  <div id="errBar"></div>
+  <div class="stats">
+    <div class="stat"><span>وضعیت</span><b id="sState">—</b></div>
+    <div class="stat"><span>آخرین دوره</span><b id="sLast">—</b></div>
+    <div class="stat"><span>دورهٔ بعد</span><b id="sNext">—</b></div>
+    <div class="stat"><span>در صف ارسال</span><b id="sQueue">—</b></div>
+    <div class="stat"><span>ترجمه</span><b id="sTr">—</b></div>
+    <div class="stat"><span>کل ارسال‌شده</span><b id="sSent">—</b></div>
+    <div class="stat"><span>حجم دیتابیس</span><b id="sDb">—</b></div>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="connect" class="act">🔌 اتصال به بله</button>
+    <button data-tab="send">📨 نحوهٔ ارسال</button>
+    <button data-tab="sources">📡 منابع و دسته‌بندی</button>
+    <button data-tab="translate">🌐 ترجمه</button>
+    <button data-tab="filter">🔎 فیلتر</button>
+    <button data-tab="advanced">⚙️ پیشرفته</button>
+    <button data-tab="logs">📜 گزارش زنده</button>
+  </nav>
+
+  <!-- ===================== CONNECT ===================== -->
+  <section class="panel act" id="p-connect">
+    <div class="card">
+      <h2>🔌 اتصال به بله</h2>
+      <p class="sub">این دو مورد ضروری‌اند. راهنمای کامل و تصویری‌تر در فایل PDF همراه برنامه است.</p>
+      <div class="field">
+        <label for="token">توکن ربات <span class="req">ضروری</span></label>
+        <div class="hint"><b>چی بنویسم؟</b> رشته‌ای شبیه <span class="ltr">123456789:AbCdEfGh…</span> — <b>از کجا بگیرم؟</b> در بله با <span class="ltr">@botfather</span> چت کنید، <span class="ltr">/newbot</span> را بفرستید، نام و آیدی ربات را بدهید؛ در پایان توکن را می‌فرستد. توکن مثل رمز عبور است؛ به کسی ندهید.</div>
+        <div class="inline"><input id="token" type="password" class="ltr" autocomplete="off"><button id="bShow" type="button">نمایش</button></div>
+        <div class="hint" id="tokenSaved" style="margin-top:4px"></div>
+      </div>
+      <div class="field">
+        <label for="channel">آیدی کانال <span class="req">ضروری</span></label>
+        <div class="hint"><b>چی بنویسم؟</b> آیدی عمومی کانال با @ (مثل <span class="ltr">@my_sec_feed</span>)، یا لینک <span class="ltr">ble.ir/my_sec_feed</span>، یا شناسهٔ عددی. — <b>از کجا بگیرم؟</b> کانال را «عمومی» بسازید؛ آیدی همان بخش بعد از <span class="ltr">ble.ir/</span> است. ربات را حتماً <b>ادمین کانال</b> (با اجازهٔ ارسال پیام) کنید.</div>
+        <input id="channel" type="text" class="ltr" placeholder="@my_sec_feed">
+      </div>
+      <div class="btns">
+        <button class="pri" id="bTestBale">✅ تست اتصال و ارسال پیام آزمایشی</button>
+        <button id="bDetect">🔢 پیدا کردن شناسهٔ عددی (کانال خصوصی)</button>
+      </div>
+      <div id="msgBale"></div>
+      <details><summary>📘 راهنمای سریع ساخت ربات و کانال</summary>
+        <ol class="steps">
+          <li>در بله (یا <span class="ltr">web.bale.ai</span>) چت <span class="ltr">@botfather</span> را باز کنید و <span class="ltr">/newbot</span> بفرستید. نام و نام کاربری (انگلیسی، معمولاً به <span class="ltr">bot</span> ختم می‌شود) بدهید و توکن را کپی کنید.</li>
+          <li>یک کانال «عمومی» با آیدی دلخواه بسازید (مثلاً <span class="ltr">my_sec_feed</span>).</li>
+          <li>وارد کانال شوید ← مدیران ← افزودن مدیر ← ربات خود را جستجو و انتخاب کنید ← اجازهٔ «ارسال پیام» را فعال کنید.</li>
+          <li>توکن و آیدی را همین‌جا بنویسید و «تست اتصال» را بزنید.</li>
+        </ol>
+      </details>
+      <div class="hint" style="margin-top:10px">دکمهٔ «پیدا کردن شناسهٔ عددی» فقط برای کانال خصوصی است: ابتدا یک پیام در کانال بنویسید و ربات را ادمین کنید. ممکن است در بله نتیجه ندهد؛ در آن صورت کانال را عمومی کنید.</div>
+    </div>
+  </section>
+
+  <!-- ===================== SEND ===================== -->
+  <section class="panel" id="p-send">
+    <div class="card">
+      <h2>📨 نحوهٔ ارسال</h2>
+      <p class="sub">زمان‌بندی و شکل پست‌ها.</p>
+      <label class="sw"><input id="fulltext" type="checkbox"><span class="slider"></span><span class="swt"><b>ارسال متن کامل خبر</b><small>متن کامل مقاله بدون هیچ محدودیتی؛ اگر طولانی بود در چند پیام پشت‌سرهم. اگر خاموش باشد فقط خلاصه فرستاده می‌شود.</small></span></label>
+      <label class="sw"><input id="sendimg" type="checkbox"><span class="slider"></span><span class="swt"><b>ارسال عکس‌ها</b><small>تصویر شاخص + همهٔ عکس‌های داخل مقاله، به ترتیب خودِ مقاله.</small></span></label>
+      <label class="sw"><input id="skipback" type="checkbox"><span class="slider"></span><span class="swt"><b>در اولین اجرا مطالب قدیمی ارسال نشود</b><small>فقط خبرهای جدیدِ بعد از شروع ربات فرستاده شود.</small></span></label>
+      <label class="sw"><input id="autostart" type="checkbox"><span class="slider"></span><span class="swt"><b>شروع خودکار</b><small>با اجرای برنامه، ربات هم خودکار شروع شود.</small></span></label>
+      <div class="alert info" style="margin-top:14px">⚡ <b>ارسال پیوسته:</b> ربات تا خالی شدن صف پشت‌سرهم خبر می‌فرستد؛ هیچ سقفی برای تعداد خبر در هر دوره نیست. خبری که ترجمه‌اش موقتاً به‌خاطر محدودیت سرویس‌ها ممکن نیست کنار گذاشته می‌شود و بقیه ادامه می‌یابند؛ بعداً خودکار برمی‌گردد.</div>
+      <div class="row" style="margin-top:6px">
+        <div class="field"><label for="interval">هر چند دقیقه منابع جدید بررسی شود؟</label><div class="hint">فقط بررسی منابع؛ ارسال از صف همیشه پیوسته است. پیشنهاد: ۱۵ تا ۳۰.</div><input id="interval" type="number" min="1" max="1440"></div>
+        <div class="field"><label for="delay">فاصلهٔ بین دو خبر (ثانیه)</label><div class="hint">برای جلوگیری از محدودیت نرخ بله. پیشنهاد: ۳ تا ۵.</div><input id="delay" type="number" min="1" max="120"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="maxage">حداکثر سن خبر (ساعت)</label><div class="hint">قدیمی‌تر نادیده گرفته می‌شود.</div><input id="maxage" type="number" min="1" max="720"></div>
+        <div class="field"><label for="maximg">حداکثر عکس در هر خبر</label><div class="hint">۰ = بدون محدودیت.</div><input id="maximg" type="number" min="0" max="500"></div>
+        <div class="field"><label for="sumchars">طول خلاصه (فقط بدون «متن کامل»)</label><div class="hint">۰ = فقط عنوان و لینک.</div><input id="sumchars" type="number" min="0" max="800"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SOURCES ===================== -->
+  <section class="panel" id="p-sources">
+    <div class="card">
+      <h2>📡 منابع آماده</h2>
+      <p class="sub">منابع تیک‌خورده در هر دوره بررسی می‌شوند. «تست منابع» نشان می‌دهد کدام‌ها از اینترنت شما در دسترس‌اند.</p>
+      <div id="sources"></div>
+      <div class="btns"><button class="pri" id="bTestSrc">🧪 تست منابع انتخاب‌شده</button></div>
+      <div id="msgSrc"></div>
+    </div>
+    <div class="card">
+      <h2>🗂 دسته‌بندی‌های من</h2>
+      <p class="sub">دستهٔ دلخواه بسازید؛ هنگام افزودن منبع دستی انتخابش می‌کنید و در کانال با نام و هشتگ زیر خبر می‌آید (مثل <span class="ltr">#تهدیدات_ایران</span>).</p>
+      <div class="row">
+        <div style="flex:3 1 220px"><input id="newCatName" type="text" placeholder="نام دسته، مثلاً «تهدیدات ایران»"></div>
+        <div style="flex:0 1 110px"><input id="newCatEmoji" type="text" maxlength="8" placeholder="🧩 ایموجی"></div>
+        <div class="fix"><button id="bAddCat">➕ افزودن دسته</button></div>
+      </div>
+      <div id="myCats" class="chips"></div>
+    </div>
+    <div class="card">
+      <h2>➕ منابع دستی من</h2>
+      <p class="sub"><b>چی بنویسم؟</b> آدرس سایت یا آدرس فید RSS/Atom. اگر آدرس خودِ سایت را بدهید، فید آن خودکار پیدا و همان لحظه بررسی می‌شود. نام را خالی بگذارید تا از خود سایت گرفته شود.</p>
+      <div class="row">
+        <div style="flex:3 1 280px"><input id="newFeedUrl" type="text" class="ltr" placeholder="https://example.org   یا   https://example.org/feed.xml"></div>
+        <div style="flex:1 1 150px"><input id="newFeedName" type="text" placeholder="نام (اختیاری)"></div>
+        <div style="flex:1 1 160px"><select id="newFeedCat"></select></div>
+        <div class="fix"><button class="pri" id="bAddFeed">🔎 بررسی و افزودن</button></div>
+      </div>
+      <div id="myFeeds"></div>
+    </div>
+  </section>
+
+  <!-- ===================== TRANSLATE ===================== -->
+  <section class="panel" id="p-translate">
+    <div class="card">
+      <h2>🌐 ترجمهٔ خودکار به فارسی</h2>
+      <p class="sub">هر خبر غیرفارسی <b>تکه‌تکه</b> ترجمه می‌شود (محدودیت سرویس‌های ترجمه جلوی کامل شدن را نمی‌گیرد). وقتی ترجمهٔ همهٔ تکه‌ها تمام شد، در کانال <b>اول کل متن اصلی (با عکس‌ها) و بعد کل ترجمهٔ فارسی</b> ارسال می‌شود؛ هر کدام در چند پیام اگر لازم باشد. متن فارسی دست نمی‌خورد.</p>
+      <label class="sw"><input id="trOn" type="checkbox"><span class="slider"></span><span class="swt"><b>ترجمه فعال باشد</b><small>عنوان و متن هر خبر غیرفارسی (انگلیسی، عربی، روسی و…) به فارسی ترجمه می‌شود.</small></span></label>
+      <label class="sw"><input id="trBody" type="checkbox"><span class="slider"></span><span class="swt"><b>متن کامل هم ترجمه شود</b><small>اگر خاموش باشد فقط عنوان ترجمه می‌شود.</small></span></label>
+      <label class="sw"><input id="trOrig" type="checkbox"><span class="slider"></span><span class="swt"><b>عنوان اصلی زیر عنوان فارسی نمایش داده شود</b></span></label>
+      <label class="sw"><input id="trOrigBody" type="checkbox"><span class="slider"></span><span class="swt"><b>اول متن اصلی کامل، بعد ترجمهٔ فارسی کامل</b><small>اگر خاموش باشد فقط ترجمهٔ فارسی (همراه عکس‌ها) ارسال می‌شود.</small></span></label>
+    </div>
+    <div class="card">
+      <h2>✂️ تکه‌تکه کردن و پرهیز از محدودیت</h2>
+      <p class="sub">اگر سرویسی محدود کرد (مثلاً HTTP 429)، برنامه همان سرویس را کند می‌کند، سراغ سرویس بعدی می‌رود، و اگر همه محدود بودند، آن خبر را کنار می‌گذارد و خبرهای بعدی را ادامه می‌دهد. تکه‌های ترجمه‌شده ذخیره می‌مانند و دوباره ترجمه نمی‌شوند. تا ترجمه کامل نشود چیزی نیمه‌کاره ارسال نمی‌شود.</p>
+      <div class="row">
+        <div class="field"><label for="trChunk">اندازهٔ هر تکه (کاراکتر)</label><div class="hint">هر تکه جدا ترجمه می‌شود. کوچک‌تر = محدودیت کمتر ولی پیام‌های بیشتر. پیشنهاد: ۱۰۰۰ تا ۲۰۰۰.</div><input id="trChunk" type="number" min="300" max="3000" step="100"></div>
+        <div class="field"><label for="trDelay">فاصلهٔ بین درخواست‌های ترجمه (ثانیه)</label><div class="hint">برای جلوگیری از محدودیت (۴۲۹). پیشنهاد: ۱ تا ۳. بعد از هر ۴۲۹ برنامه خودکار بیشتر کند می‌کند.</div><input id="trDelay" type="number" min="0" max="30" step="0.5"></div>
+        <div class="field"><label for="trGiveUp">انصراف از ترجمه بعد از (دقیقه)</label><div class="hint">اگر ترجمهٔ یک خبر این‌قدر ممکن نشد، متن اصلی با نشانهٔ «⚠️ ترجمه ممکن نشد» ارسال می‌شود تا صف نماند. ۰ = هرگز (تا ترجمه ممکن شود صبر کن).</div><input id="trGiveUp" type="number" min="0" max="1440"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🔧 سرویس ترجمه</h2>
+      <p class="sub">سرویس اصلی را انتخاب کنید؛ اگر خطا یا محدودیت داد خودکار سراغ بقیه می‌رود (Edge، Google، Lingva و MyMemory همیشه، بقیه در صورت تنظیم بودن).</p>
+      <div class="provs" id="provs">
+        <label class="prov"><input type="radio" name="trProv" value="edge"><b>Microsoft Edge ⭐</b><small>رایگان، بدون کلید؛ معمولاً کمتر محدود می‌شود (پیشنهادی)</small></label>
+        <label class="prov"><input type="radio" name="trProv" value="google"><b>Google</b><small>رایگان و بدون کلید؛ اغلب خطای ۴۲۹ می‌دهد</small></label>
+        <label class="prov"><input type="radio" name="trProv" value="lingva"><b>Lingva</b><small>رایگان؛ چند سرور به‌نوبت</small></label>
+        <label class="prov"><input type="radio" name="trProv" value="mymemory"><b>MyMemory</b><small>رایگان با سهمیهٔ روزانهٔ کم</small></label>
+        <label class="prov"><input type="radio" name="trProv" value="libretranslate"><b>LibreTranslate</b><small>سرور شخصی؛ بدون محدودیت</small></label>
+        <label class="prov"><input type="radio" name="trProv" value="google_cloud"><b>Google Cloud (رسمی)</b><small>با کلید API؛ پایدارترین</small></label>
+      </div>
+      <div class="subbox" id="grp-lingva"><div class="field"><label for="lingvaUrl">آدرس سرورهای Lingva</label><div class="hint"><b>چی بنویسم؟</b> یک یا چند آدرس با ویرگول؛ برنامه به‌نوبت امتحانشان می‌کند. پیش‌فرض را نگه دارید یا سرور خودتان را اضافه کنید.</div><input id="lingvaUrl" type="text" class="ltr"></div></div>
+      <div class="subbox" id="grp-mymemory"><div class="field"><label for="mmEmail">ایمیل <span class="opt">اختیاری</span></label><div class="hint"><b>چی بنویسم؟</b> یک ایمیل معتبر؛ فقط برای بالا رفتن سهمیهٔ رایگان (حدود ۱۰ برابر). ثبت‌نام لازم نیست.</div><input id="mmEmail" type="text" class="ltr" placeholder="you@example.com"></div></div>
+      <div class="subbox" id="grp-libretranslate">
+        <div class="field"><label for="libUrl">آدرس سرور LibreTranslate</label><div class="hint"><b>چی بنویسم؟</b> مثل <span class="ltr">http://127.0.0.1:5000</span> (سرور شخصی). <b>از کجا بگیرم؟</b> راهنمای PDF، بخش ۱۵.</div><input id="libUrl" type="text" class="ltr" placeholder="http://127.0.0.1:5000"></div>
+        <div class="field"><label for="libKey">کلید API <span class="opt">اختیاری</span></label><div class="hint">فقط اگر سرور کلید می‌خواهد.</div><input id="libKey" type="password" class="ltr" autocomplete="off"><div class="hint" id="libKeySaved"></div></div>
+      </div>
+      <div class="subbox" id="grp-google_cloud"><div class="field"><label for="gKey">کلید API گوگل کلود</label><div class="hint"><b>از کجا بگیرم؟</b> در <span class="ltr">console.cloud.google.com</span> سرویس «Cloud Translation API» را فعال و یک کلید API بسازید (نیازمند حساب پرداخت؛ سهمیهٔ رایگان ماهانه دارد). راهنمای PDF، بخش ۱۵.</div><input id="gKey" type="password" class="ltr" autocomplete="off"><div class="hint" id="gKeySaved"></div></div></div>
+      <div class="btns"><button class="pri" id="bTestTr">🧪 تست ترجمه</button></div>
+      <div id="msgTr"></div>
+    </div>
+  </section>
+
+  <!-- ===================== FILTER ===================== -->
+  <section class="panel" id="p-filter">
+    <div class="card">
+      <h2>🔎 فیلتر کلمات کلیدی <span class="opt">اختیاری</span></h2>
+      <p class="sub">فیلتر روی عنوان و خلاصهٔ خبر (به زبان اصلی) اعمال می‌شود.</p>
+      <div class="row">
+        <div class="field"><label for="inc">فقط اگر شامل این کلمات بود</label><div class="hint">هر خط یک کلمه (انگلیسی). خالی = همه. مثال: <span class="ltr">iran, ddos, bgp, ransomware</span></div><textarea id="inc" class="ltr"></textarea></div>
+        <div class="field"><label for="exc">اگر شامل این کلمات بود ارسال نشود</label><div class="hint">مثلاً تبلیغات و وبینارها: <span class="ltr">webinar, sponsored</span></div><textarea id="exc" class="ltr"></textarea></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ADVANCED ===================== -->
+  <section class="panel" id="p-advanced">
+    <div class="card">
+      <h2>🌍 پروکسی و شبکه</h2>
+      <p class="sub">فقط در صورت نیاز.</p>
+      <div class="field"><label for="fetchproxy">پروکسی دریافت منابع و ترجمه <span class="opt">اختیاری</span></label>
+        <div class="hint">اگر سایت‌های خبری یا سرویس ترجمه از اینترنت شما باز نمی‌شوند. نمونه: <span class="ltr">http://127.0.0.1:10809</span> یا <span class="ltr">socks5://127.0.0.1:10808</span>. آدرس را از برنامهٔ VPN/پروکسی خودتان بردارید (Local proxy / Port).</div>
+        <input id="fetchproxy" type="text" class="ltr"></div>
+      <div class="field"><label for="baleproxy">پروکسی ارتباط با بله <span class="opt">اختیاری</span></label>
+        <div class="hint">فقط اگر اتصال به سرور بله از شبکهٔ شما برقرار نمی‌شود (مثلاً اجرا روی سرور خارج از ایران). معمولاً خالی بماند.</div>
+        <input id="baleproxy" type="text" class="ltr"></div>
+      <div class="field"><label for="apibase">آدرس API بله</label><div class="hint">پیش‌فرض را تغییر ندهید، مگر اینکه رلهٔ شخصی دارید.</div><input id="apibase" type="text" class="ltr"></div>
+    </div>
+    <div class="card">
+      <h2>🗄 دیتابیس</h2>
+      <p class="sub">متن و عکسِ هر خبر <b>بلافاصله پس از ارسال کامل از دیتابیس حذف می‌شود</b>؛ فقط یک اثرانگشت ۲۰ حرفی (برای ارسال‌نشدن تکراری) می‌ماند که بعد از چند روز خودکار پاک می‌شود.</p>
+      <div class="field" style="max-width:260px"><label for="retention">نگه‌داشتن اثرانگشت‌ها (روز)</label><input id="retention" type="number" min="3" max="365"></div>
+      <div class="btns"><button id="bClearQ">🧹 خالی کردن صف ارسال</button><button class="bad" id="bClearAll">🗑 پاک‌سازی کامل دیتابیس</button></div>
+      <div class="hint" style="margin-top:6px">«پاک‌سازی کامل» اثرانگشت‌ها را هم پاک می‌کند؛ ممکن است خبرهای اخیر دوباره ارسال شوند.</div>
+    </div>
+  </section>
+
+  <!-- ===================== LOGS ===================== -->
+  <section class="panel" id="p-logs">
+    <div class="card" id="feedCard" style="display:none">
+      <h2>📡 وضعیت منابع</h2>
+      <p class="sub" id="feedSub"></p>
+      <div id="feedList"></div>
+      <div class="btns"><button class="bad" id="bDisableFailed">⛔ غیرفعال کردن منابع آمادهٔ ناموفق</button><button id="bGoProxy">🌍 تنظیم پروکسی</button></div>
+    </div>
+    <div class="card">
+      <h2>📜 گزارش زنده</h2>
+      <p class="sub" id="sSummary">هر ۳ ثانیه به‌روز می‌شود.</p>
+      <div id="logs"></div>
+    </div>
+  </section>
+  <footer>ربات رصد امنیتی بله · فقط روی همین کامپیوتر (127.0.0.1) در دسترس است</footer>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+const TOKEN="__PANEL_TOKEN__";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(path,body){
+  const o={headers:{"X-Panel-Token":TOKEN}};
+  if(body!==undefined){o.method="POST";o.headers["Content-Type"]="application/json";o.body=JSON.stringify(body);}
+  try{const r=await fetch(path,o);return await r.json();}catch(e){return {ok:false,error:"ارتباط با برنامه قطع است. آیا برنامه هنوز اجرا است؟"};}
+}
+function toast(text,type){const t=document.createElement("div");t.className="toast "+(type||"");t.textContent=text;$("toasts").appendChild(t);setTimeout(()=>t.remove(),3400);}
+function alertBox(id,type,html){$(id).innerHTML=html?`<div class="alert ${type}">${html}</div>`:"";}
+const busy=(btn,on)=>{btn.disabled=on;};
+function goTab(name){
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("act",b.dataset.tab===name));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("act",p.id==="p-"+name));
+}
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>goTab(b.dataset.tab));
+const THEMES=[["blue","آبی","#3a6bff","#7a4dff"],["pink","صورتی","#e8458b","#ff7aa8"],["rose","رز","#d6336c","#f06595"],["red","قرمز","#e5383b","#ff6b57"],
+["orange","نارنجی","#f26a0f","#ffb020"],["amber","زرد","#d99100","#ffc933"],["green","سبز","#0f9d63","#12b8a6"],["teal","فیروزه‌ای","#0ea5b7","#3b82f6"],["purple","بنفش","#7c3aed","#c04bff"],
+["night","شب آبی","#1a2331","#4c82ff"],["nightpink","شب صورتی","#2a1a25","#ff5c9d"],["nightred","شب قرمز","#2a1a1a","#ff4d50"]];
+function applyTheme(t,save){
+  if(t==="blue")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t);
+  document.querySelectorAll(".tp-dot").forEach(d=>d.classList.toggle("act",d.dataset.t===t));
+  if(save){try{localStorage.setItem("balebot_theme",t);}catch(e){}}
+}
+(function(){
+  const pop=$("tpPop"),cur=document.documentElement.getAttribute("data-theme")||"blue";
+  THEMES.forEach(([id,name,c1,c2])=>{const b=document.createElement("button");b.className="tp-dot";b.dataset.t=id;b.title=name;
+    b.innerHTML=`<i style="background:linear-gradient(135deg,${c1},${c2})"></i>${name}`;b.onclick=()=>applyTheme(id,true);pop.appendChild(b);});
+  applyTheme(cur,false);
+  $("bTheme").onclick=e=>{e.stopPropagation();pop.classList.toggle("open");};
+  document.addEventListener("click",e=>{if(!e.target.closest(".tp"))pop.classList.remove("open");});
+})();
+document.querySelectorAll("[data-go]").forEach(a=>a.onclick=()=>goTab(a.dataset.go));
+
+let SRC=[],CATS={},CAT_EMOJI={},MY_CATS=[],MY_FEEDS=[];
+const catLabel=id=>{const c=MY_CATS.find(x=>x.id===id);return c?`${c.emoji} ${c.name}`:`${CAT_EMOJI[id]||"📌"} ${CATS[id]||"سایر"}`;};
+function catOptions(sel){
+  let h="";
+  for(const k of Object.keys(CATS))h+=`<option value="${k}" ${k===sel?"selected":""}>${esc(catLabel(k))}</option>`;
+  for(const c of MY_CATS)h+=`<option value="${c.id}" ${c.id===sel?"selected":""}>${esc(c.emoji+" "+c.name)}</option>`;
+  return h;
+}
+function renderSources(selected){
+  const sel=new Set(selected);let h="";
+  for(const [key,label] of Object.entries(CATS)){
+    if(key==="custom")continue;
+    const list=SRC.filter(s=>s.category===key);if(!list.length)continue;
+    h+=`<div class="catbox"><div class="cathead">${esc(CAT_EMOJI[key]||"")} ${esc(label)} <a data-cat="${key}" data-on="1">همه</a><a data-cat="${key}" data-on="0">هیچ</a></div><div class="grid">`;
+    for(const s of list){
+      h+=`<label class="cc"><input type="checkbox" class="src" data-cat="${key}" id="s-${s.id}" value="${s.id}" ${sel.has(s.id)?"checked":""}>
+      <span><span class="nm">${esc(s.name)}</span><small>${esc(s.url)}</small></span><span class="res" id="r-${s.id}"></span></label>`;
+    }
+    h+="</div></div>";
+  }
+  $("sources").innerHTML=h;
+  document.querySelectorAll("#sources a[data-cat]").forEach(a=>a.onclick=()=>{
+    document.querySelectorAll(`input.src[data-cat="${a.dataset.cat}"]`).forEach(c=>c.checked=a.dataset.on==="1");});
+}
+function renderMine(){
+  $("myCats").innerHTML=MY_CATS.length?MY_CATS.map((c,i)=>`<span class="chip">${esc(c.emoji)} ${esc(c.name)}<a data-delcat="${i}" title="حذف">✕</a></span>`).join(""):'<span class="hint">هنوز دسته‌ای نساخته‌اید.</span>';
+  const keep=$("newFeedCat").value;$("newFeedCat").innerHTML=catOptions(keep||"custom");
+  $("myFeeds").innerHTML=MY_FEEDS.length?MY_FEEDS.map((f,i)=>`<div class="myfeed" data-url="${esc(f.url)}"><span class="nm">${esc(f.name)}</span><small>${esc(f.url)}</small>
+    <select data-feedcat="${i}">${catOptions(f.category)}</select><span class="res"></span><a class="del" data-delfeed="${i}">🗑 حذف</a></div>`).join(""):'<div class="hint" style="margin-top:10px">هنوز منبع دستی اضافه نکرده‌اید.</div>';
+  document.querySelectorAll("[data-delcat]").forEach(a=>a.onclick=async()=>{
+    const c=MY_CATS[+a.dataset.delcat];MY_FEEDS.forEach(f=>{if(f.category===c.id)f.category="custom";});
+    MY_CATS.splice(+a.dataset.delcat,1);await persist("دسته حذف شد.");});
+  document.querySelectorAll("[data-delfeed]").forEach(a=>a.onclick=async()=>{MY_FEEDS.splice(+a.dataset.delfeed,1);await persist("منبع حذف شد.");});
+  document.querySelectorAll("[data-feedcat]").forEach(sel=>sel.onchange=async()=>{MY_FEEDS[+sel.dataset.feedcat].category=sel.value;await persist("دستهٔ منبع تغییر کرد.");});
+}
+async function persist(okText){
+  const r=await save();
+  if(r.ok){toast("✅ "+okText,"ok");alertBox("msgSrc","","");}else toast("❌ "+(r.error||"خطا"),"err");
+}
+const provVal=()=>(document.querySelector('input[name=trProv]:checked')||{}).value||"edge";
+function toggleProv(){["lingva","mymemory","libretranslate","google_cloud"].forEach(p=>{$("grp-"+p).style.display=provVal()===p?"block":"none";});}
+document.querySelectorAll("input[name=trProv]").forEach(r=>r.onchange=toggleProv);
+
+function fill(c){
+  $("token").value="";
+  $("token").placeholder=c.has_token?"(ذخیره شده — برای تغییر، توکن جدید را وارد کنید)":"123456789:AbCdEf...";
+  $("tokenSaved").textContent=c.has_token?("توکن ذخیره‌شده: "+c.token_masked):"";
+  $("channel").value=c.channel_id;$("interval").value=c.interval_minutes;
+  $("delay").value=c.delay_between_posts_sec;$("maxage").value=c.max_age_hours;$("sumchars").value=c.summary_chars;$("maximg").value=c.max_images;
+  $("fulltext").checked=c.full_text;$("sendimg").checked=c.send_images;$("skipback").checked=c.skip_backlog_first_run;$("autostart").checked=c.auto_start;
+  $("inc").value=c.include_keywords_text;$("exc").value=c.exclude_keywords_text;
+  $("fetchproxy").value=c.fetch_proxy;$("baleproxy").value=c.bale_proxy;$("apibase").value=c.bale_api_base;$("retention").value=c.seen_retention_days;
+  $("trOn").checked=c.translate_enabled;$("trBody").checked=c.translate_body;$("trOrig").checked=c.translate_show_original;
+  $("trOrigBody").checked=c.translate_original_body;$("trChunk").value=c.translate_chunk_chars;$("trDelay").value=c.translate_delay_sec;$("trGiveUp").value=c.translate_give_up_min;
+  const r=document.querySelector(`input[name=trProv][value="${c.translate_provider}"]`);if(r)r.checked=true;
+  $("mmEmail").value=c.mymemory_email;$("lingvaUrl").value=c.lingva_url;$("libUrl").value=c.libretranslate_url;$("libKey").value="";$("gKey").value="";
+  $("libKeySaved").textContent=c.has_libre_key?("کلید ذخیره‌شده: "+c.libre_key_masked+" (برای تغییر، کلید جدید را وارد کنید)"):"";
+  $("gKeySaved").textContent=c.has_gkey?("کلید ذخیره‌شده: "+c.gkey_masked+" (برای تغییر، کلید جدید را وارد کنید)"):"";
+  toggleProv();
+  MY_CATS=(c.custom_categories||[]).map(x=>({...x}));MY_FEEDS=(c.custom_feeds||[]).map(x=>({name:x.name,url:x.url,category:x.category}));
+  renderSources(c.selected_sources);renderMine();
+  $("banner").style.display=(c.has_token&&c.channel_id)?"none":"block";
+}
+function collect(){
+  return {
+    bale_token:$("token").value.trim(),channel_id:$("channel").value.trim(),
+    interval_minutes:+$("interval").value,
+    delay_between_posts_sec:+$("delay").value,max_age_hours:+$("maxage").value,summary_chars:+$("sumchars").value,max_images:+$("maximg").value,
+    full_text:$("fulltext").checked,send_images:$("sendimg").checked,skip_backlog_first_run:$("skipback").checked,auto_start:$("autostart").checked,
+    selected_sources:[...document.querySelectorAll("input.src:checked")].map(x=>x.value),
+    custom_categories:MY_CATS,custom_feeds:MY_FEEDS,
+    include_keywords_text:$("inc").value,exclude_keywords_text:$("exc").value,
+    fetch_proxy:$("fetchproxy").value.trim(),bale_proxy:$("baleproxy").value.trim(),bale_api_base:$("apibase").value.trim(),
+    seen_retention_days:+$("retention").value,
+    translate_enabled:$("trOn").checked,translate_body:$("trBody").checked,translate_show_original:$("trOrig").checked,
+    translate_original_body:$("trOrigBody").checked,translate_provider:provVal(),translate_chunk_chars:+$("trChunk").value,
+    translate_delay_sec:+$("trDelay").value,translate_give_up_min:+$("trGiveUp").value,mymemory_email:$("mmEmail").value.trim(),lingva_url:$("lingvaUrl").value.trim(),
+    libretranslate_url:$("libUrl").value.trim(),libretranslate_key:$("libKey").value.trim(),google_api_key:$("gKey").value.trim()
+  };
+}
+async function save(){const r=await api("/api/save",collect());if(r.ok)fill(r.config);return r;}
+
+$("bShow").onclick=()=>{const t=$("token");t.type=t.type==="password"?"text":"password";$("bShow").textContent=t.type==="password"?"نمایش":"پنهان";};
+$("bSave").onclick=async()=>{const r=await save();r.ok?toast("✅ تنظیمات ذخیره شد","ok"):toast("❌ "+(r.error||"خطا"),"err");};
+$("bStart").onclick=async()=>{
+  const s=await save();if(!s.ok){toast("❌ "+(s.error||"خطا"),"err");return;}
+  const r=await api("/api/start",{});r.ok?toast("▶ ربات شروع شد","ok"):toast("❌ "+r.error,"err");poll();
+};
+$("bStop").onclick=async()=>{await api("/api/stop",{});toast("■ ربات متوقف شد");poll();};
+$("bNow").onclick=async()=>{await save();const r=await api("/api/run_now",{});r.ok?toast("⟳ یک دورهٔ فوری شروع شد","ok"):toast("❌ "+r.error,"err");};
+$("bTestBale").onclick=async()=>{
+  const b=$("bTestBale");busy(b,true);alertBox("msgBale","info","در حال تست…");
+  const r=await api("/api/test_bale",collect());busy(b,false);
+  const steps=r.steps||[{ok:false,text:r.error||"خطا"}];
+  alertBox("msgBale",r.ok?"ok":"err",steps.map(s=>`<div>${s.ok?"✅":"❌"} ${esc(s.text)}</div>`).join(""));
+  if(r.ok)await save();
+};
+$("bDetect").onclick=async()=>{
+  const b=$("bDetect");busy(b,true);alertBox("msgBale","info","در حال جستجو…");
+  const r=await api("/api/detect_chat",collect());busy(b,false);
+  if(!r.ok){alertBox("msgBale","err","❌ "+esc(r.error));return;}
+  if(!r.chats.length){alertBox("msgBale","warn","چیزی پیدا نشد. ابتدا یک پیام در کانال بنویسید و ربات را ادمین کنید؛ اگر باز هم خالی بود از آیدی عمومی استفاده کنید.");return;}
+  alertBox("msgBale","ok",r.chats.map(c=>`<div>${esc(c.type||"chat")} — ${esc(c.title)} — شناسه: <span class="ltr">${esc(c.id)}</span></div>`).join(""));
+};
+$("bTestSrc").onclick=async()=>{
+  const b=$("bTestSrc");busy(b,true);alertBox("msgSrc","info","در حال تست منابع (ممکن است تا نیم دقیقه طول بکشد)…");
+  const r=await api("/api/test_sources",collect());busy(b,false);
+  if(!r.ok){alertBox("msgSrc","err",esc(r.error||"خطا"));return;}
+  let ok=0,bad=0;
+  document.querySelectorAll("#sources .res, #myFeeds .res").forEach(e=>{e.textContent="";});
+  for(const x of r.results){
+    x.ok?ok++:bad++;
+    const t=x.ok?`✅ ${x.count} مطلب`:`❌ ${x.error}`;
+    let el=$("r-"+x.id);
+    if(!el){const row=[...document.querySelectorAll("#myFeeds .myfeed")].find(e=>e.dataset.url===x.url);el=row&&row.querySelector(".res");}
+    if(el){el.textContent=t;el.className="res "+(x.ok?"ok":"err");}
+  }
+  alertBox("msgSrc",bad?"warn":"ok",`${ok} منبع سالم، ${bad} منبع ناموفق.`+(bad?'<div class="sm-t">منابع ناموفق را تیک بردارید/حذف کنید یا پروکسی دریافت منابع را در تب «پیشرفته» تنظیم کنید.</div>':""));
+};
+$("bAddCat").onclick=async()=>{
+  const name=$("newCatName").value.trim();if(!name){toast("نام دسته را بنویسید","err");return;}
+  if(MY_CATS.some(c=>c.name.toLowerCase()===name.toLowerCase())){toast("این دسته از قبل وجود دارد","err");return;}
+  MY_CATS.push({id:"c-"+Math.random().toString(36).slice(2,8).padEnd(6,"x"),name:name,emoji:$("newCatEmoji").value.trim()||"📌"});
+  $("newCatName").value="";$("newCatEmoji").value="";await persist("دسته افزوده شد.");
+};
+$("bAddFeed").onclick=async()=>{
+  const url=$("newFeedUrl").value.trim();if(!url){toast("آدرس سایت یا فید را بنویسید","err");return;}
+  const b=$("bAddFeed");busy(b,true);
+  const r=await api("/api/check_feed",{url:url,fetch_proxy:$("fetchproxy").value.trim()});busy(b,false);
+  if(!r.ok){toast("❌ "+r.error,"err");return;}
+  if(MY_FEEDS.some(f=>f.url===r.feed_url)){toast("این فید از قبل در فهرست هست","err");return;}
+  let host="";try{host=new URL(r.feed_url).hostname;}catch(e){}
+  MY_FEEDS.push({name:$("newFeedName").value.trim()||r.title||host,url:r.feed_url,category:$("newFeedCat").value||"custom"});
+  $("newFeedUrl").value="";$("newFeedName").value="";
+  await persist(`فید پیدا شد (${r.count} مطلب) و افزوده شد.`);
+};
+$("bTestTr").onclick=async()=>{
+  const b=$("bTestTr");busy(b,true);alertBox("msgTr","info","در حال تست ترجمه…");
+  const r=await api("/api/test_translate",collect());busy(b,false);
+  alertBox("msgTr",r.ok?"ok":"err",r.ok?`<div>✅ ترجمه کار می‌کند — سرویس: <b>${esc(r.provider)}</b> (${r.seconds} ثانیه)</div><div style="margin-top:4px">${esc(r.text)}</div>`
+    :`<div>❌ ترجمه ناموفق بود:</div>`+(r.errors||[r.error||"خطا"]).map(e=>`<div class="sm-t">${esc(e)}</div>`).join("")+'<div class="sm-t">اگر سرویس‌های ترجمه از شبکهٔ شما باز نمی‌شوند، پروکسی را در تب «پیشرفته» تنظیم کنید یا سرویس دیگری انتخاب کنید.</div>');
+};
+$("bClearQ").onclick=async()=>{if(confirm("صف ارسال خالی شود؟")){await api("/api/clear_db",{only_queue:true});toast("صف خالی شد","ok");poll();}};
+$("bClearAll").onclick=async()=>{if(confirm("کل دیتابیس پاک شود؟ ممکن است خبرهای اخیر دوباره ارسال شوند.")){await api("/api/clear_db",{});toast("دیتابیس پاک شد","ok");poll();}};
+
+const fmtT=ts=>ts?new Date(ts*1000).toLocaleTimeString("fa-IR"):"—";
+const fmtB=n=>n>1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB";
+let FAILED_IDS=[];
+function renderFeeds(f){
+  const bad=f.failed||[];FAILED_IDS=bad.map(x=>x.id);
+  $("feedCard").style.display=bad.length?"block":"none";if(!bad.length)return;
+  $("feedSub").innerHTML=`${f.total-bad.length} منبع سالم، <b>${bad.length}</b> منبع ناموفق (از ${f.total}). منابع ناموفق با فاصلهٔ فزاینده دوباره امتحان می‌شوند و بقیه را کند نمی‌کنند (منابع دستی ناموفق را خودتان از تب «منابع» حذف کنید).`+(bad.length*2>f.total&&f.total>=4?' <b>بیشتر منابع باز نمی‌شوند؛ احتمالاً به پروکسی/VPN نیاز دارید.</b>':"");
+  $("feedList").innerHTML=bad.map(x=>`<div class="myfeed"><span class="nm">${esc(x.name||"?")}</span><span class="res err">${esc(x.error||"")}</span><small style="margin-right:auto">${x.fails} بار پشت‌سرهم</small></div>`).join("");
+}
+$("bDisableFailed").onclick=async()=>{
+  const ids=new Set(FAILED_IDS);let n=0;
+  document.querySelectorAll("input.src:checked").forEach(c=>{if(ids.has(c.value)){c.checked=false;n++;}});
+  await persist(n?`${n} منبع ناموفق غیرفعال شد.`:"منبع آمادهٔ ناموفقی برای غیرفعال کردن نبود.");
+};
+$("bGoProxy").onclick=()=>goTab("advanced");
+async function poll(){
+  const r=await api("/api/status");if(!r.status)return;const s=r.status;
+  $("badge").className="pill"+(s.running?" on":"");$("badgeT").textContent=s.running?"در حال اجرا":"متوقف";
+  $("sState").textContent=s.state;$("sLast").textContent=fmtT(s.last_cycle);$("sNext").textContent=s.running?fmtT(s.next_cycle):"—";
+  $("sQueue").textContent=s.queue;$("sSent").textContent=s.sent_total;$("sDb").textContent=fmtB(s.db_bytes);
+  const t=s.tr||{};$("sTr").textContent=!t.enabled?"خاموش":(t.blocked_until?("محدود تا "+fmtT(t.blocked_until)):("آزاد"+(t.provider?" · "+t.provider:"")));
+  renderFeeds(s.feeds||{total:0,failed:[]});
+  $("sSummary").textContent=(s.last_summary?s.last_summary+" — ":"")+"هر ۳ ثانیه به‌روز می‌شود.";
+  const eb=$("errBar");eb.style.display=s.last_error?"block":"none";eb.textContent=s.last_error?("⚠ "+s.last_error):"";
+  const L=$("logs");const atEnd=L.scrollTop+L.clientHeight>=L.scrollHeight-30;
+  L.innerHTML=r.logs.map(l=>`<div class="l-${l.level}"><time>${l.t}</time>${esc(l.msg)}</div>`).join("");
+  if(atEnd)L.scrollTop=L.scrollHeight;
+}
+(async()=>{
+  const r=await api("/api/config");
+  if(r.config){SRC=r.sources;CATS=r.categories;CAT_EMOJI=r.category_emoji||{};fill(r.config);}
+  poll();setInterval(poll,3000);
+})();
+</script>
+</body>
+</html>
